@@ -3,35 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Chat</title>
+  <title>AI Chat Gratis</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; margin: 0; padding: 20px; }
+    body { font-family: Arial; background: #111; color: #fff; padding: 20px; margin: 0; }
     #chat { height: 70vh; overflow-y: auto; border: 1px solid #333; padding: 10px; margin-bottom: 10px; }
-    .user { text-align: right; margin: 10px 0; }
+    .user { text-align: right; margin: 8px 0; }
     .user span { background: #2563eb; padding: 8px 12px; border-radius: 12px; display: inline-block; }
-    .ai { margin: 10px 0; }
-    .ai span { background: #374151; padding: 8px 12px; border-radius: 12px; display: inline-block; }
-    .input-area { display: flex; gap: 10px; }
-    #input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; }
-    button { padding: 10px 20px; border-radius: 8px; border: none; background: #2563eb; color: #fff; cursor: pointer; }
+    .ai { margin: 8px 0; }
+    .ai span { background: #333; padding: 8px 12px; border-radius: 12px; display: inline-block; }
+    .ai img { max-width: 100%; border-radius: 12px; margin-top: 8px; }
+    .input-area { display: flex; gap: 8px; }
+    input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; }
+    button { padding: 10px 16px; border-radius: 8px; border: none; background: #2563eb; color: #fff; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h2>AI Chat</h2>
+  <h2>AI Chat Gratis</h2>
   <div id="chat"></div>
   <div class="input-area">
     <input id="input" placeholder="Ketik pesan..." onkeypress="if(event.key==='Enter') kirim()">
     <button onclick="kirim()">Kirim</button>
+    <button onclick="gambar()">Gambar</button>
   </div>
 
+  <script src="https://js.puter.com/v2/"></script>
   <script>
     const chat = document.getElementById('chat');
     const input = document.getElementById('input');
 
-    function tambahPesan(teks, tipe) {
+    function tambahPesan(teks, tipe, imgUrl) {
       const div = document.createElement('div');
       div.className = tipe;
-      div.innerHTML = `<span>${teks}</span>`;
+      if (imgUrl) {
+        div.innerHTML = `<span>${teks}<br><img src="${imgUrl}"></span>`;
+      } else {
+        div.innerHTML = `<span>${teks}</span>`;
+      }
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
     }
@@ -39,7 +46,6 @@
     async function kirim() {
       const pesan = input.value.trim();
       if (!pesan) return;
-      
       tambahPesan(pesan, 'user');
       input.value = '';
       
@@ -48,25 +54,25 @@
       loading.innerHTML = '<span>Mengetik...</span>';
       chat.appendChild(loading);
 
-      try {
-        const res = await fetch('/api/otakai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pesan })
-        });
-        
-        const data = await res.json();
-        loading.remove();
-        
-        if (data.error) {
-          tambahPesan(data.error, 'ai');
-        } else {
-          tambahPesan(data.jawaban, 'ai');
-        }
-      } catch (e) {
-        loading.remove();
-        tambahPesan('Gagal terhubung ke server', 'ai');
-      }
+      const hasil = await puter.ai.chat(pesan);
+      loading.remove();
+      tambahPesan(hasil, 'ai');
+    }
+
+    async function gambar() {
+      const pesan = input.value.trim();
+      if (!pesan) return;
+      tambahPesan(pesan, 'user');
+      input.value = '';
+      
+      const loading = document.createElement('div');
+      loading.className = 'ai';
+      loading.innerHTML = '<span>Membuat gambar...</span>';
+      chat.appendChild(loading);
+
+      const hasil = await puter.ai.txt2img(pesan);
+      loading.remove();
+      tambahPesan('Gambar selesai:', 'ai', hasil.src);
     }
   </script>
 </body>
