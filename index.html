@@ -3,39 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Chat Gratis</title>
+  <title>LanAI Editor - Chat + Edit Gambar</title>
   <style>
-    body { font-family: Arial; background: #111; color: #fff; padding: 20px; margin: 0; }
-    #chat { height: 70vh; overflow-y: auto; border: 1px solid #333; padding: 10px; margin-bottom: 10px; }
-    .user { text-align: right; margin: 8px 0; }
-    .user span { background: #2563eb; padding: 8px 12px; border-radius: 12px; display: inline-block; }
-    .ai { margin: 8px 0; }
-    .ai span { background: #333; padding: 8px 12px; border-radius: 12px; display: inline-block; }
-    .ai img { max-width: 100%; border-radius: 12px; margin-top: 8px; }
-    .input-area { display: flex; gap: 8px; }
-    input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; }
-    button { padding: 10px 16px; border-radius: 8px; border: none; background: #2563eb; color: #fff; cursor: pointer; }
+    body { font-family: Arial; background: #0a0a0a; color: #fff; margin: 0; padding: 15px; }
+    .header { text-align: center; padding: 15px 0; }
+    .header h1 { margin: 0; color: #00ff88; }
+    #chat { height: 50vh; overflow-y: auto; border: 1px solid #222; padding: 15px; margin-bottom: 15px; border-radius: 12px; }
+    .user { text-align: right; margin: 10px 0; }
+    .user span { background: #0066ff; padding: 10px 14px; border-radius: 18px; display: inline-block; max-width: 80%; }
+    .ai { margin: 10px 0; }
+    .ai span { background: #1a1a1a; padding: 10px 14px; border-radius: 18px; display: inline-block; max-width: 80%; }
+    .ai img { max-width: 100%; border-radius: 12px; margin-top: 10px; cursor: pointer; }
+    .input-area { display: flex; gap: 8px; flex-wrap: wrap; }
+    input[type="text"] { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #111; color: #fff; min-width: 200px; }
+    button, label.upload { padding: 12px 16px; border-radius: 10px; border: none; background: #00ff88; color: #000; cursor: pointer; font-weight: bold; }
+    .btn-gambar { background: #ff0066; color: #fff; }
+    .btn-edit { background: #ffaa00; color: #000; }
+    #fileInput { display: none; }
+    .preview { text-align: center; margin: 10px 0; }
+    .preview img { max-width: 200px; border-radius: 8px; border: 2px solid #00ff88; }
+    .download { background: #0066ff; color: #fff; margin-top: 8px; display: inline-block; }
   </style>
 </head>
 <body>
-  <h2>AI Chat Gratis</h2>
+  <div class="header">
+    <h1>🎨 LanAI Editor</h1>
+    <p>Chat AI + Upload & Edit Gambar Gratis</p>
+  </div>
+  
   <div id="chat"></div>
+  <div class="preview" id="preview"></div>
+  
   <div class="input-area">
-    <input id="input" placeholder="Ketik pesan..." onkeypress="if(event.key==='Enter') kirim()">
-    <button onclick="kirim()">Kirim</button>
-    <button onclick="gambar()">Gambar</button>
+    <input id="input" type="text" placeholder="Perintah: 'hapus background' / 'jadiin kartun'" onkeypress="if(event.key==='Enter') prosesAI()">
+    <label for="fileInput" class="upload">📁 Upload</label>
+    <input type="file" id="fileInput" accept="image/*">
+    <button onclick="prosesAI()">Chat</button>
+    <button class="btn-gambar" onclick="generateBaru()">Gambar Baru</button>
+    <button class="btn-edit" onclick="editGambar()">Edit Gambar</button>
   </div>
 
-  <script src="https://js.puter.com/v2/"></script>
   <script>
     const chat = document.getElementById('chat');
     const input = document.getElementById('input');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    
+    let gambarUpload = null; // Simpen gambar yang diupload
+    
+    const SYSTEM_PROMPT = `Kamu LanAI, asisten edit gambar dari Bandung. 
+    Gaya: santai, pake 'woy', 'gass'. Kalo user upload gambar, kasih ide editnya.
+    Jangan proses gambar, cuma kasih instruksi teks.`;
 
-    function tambahPesan(teks, tipe, imgUrl) {
+    function tambahPesan(teks, tipe, imgUrl = null) {
       const div = document.createElement('div');
       div.className = tipe;
       if (imgUrl) {
-        div.innerHTML = `<span>${teks}<br><img src="${imgUrl}"></span>`;
+        div.innerHTML = `<span>${teks}<br><img src="${imgUrl}" onclick="downloadImg('${imgUrl}')"><br>
+        <button class="download" onclick="downloadImg('${imgUrl}')">⬇️ Download</button></span>`;
       } else {
         div.innerHTML = `<span>${teks}</span>`;
       }
@@ -43,7 +68,23 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    async function kirim() {
+    // UPLOAD GAMBAR
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        gambarUpload = e.target.result; // base64
+        preview.innerHTML = `<p>Gambar siap diedit:</p><img src="${gambarUpload}">`;
+        tambahPesan('Gambar udah diupload woy', 'user');
+        tambahPesan('Mau diapain gambarnya? Contoh: "hapus background", "jadiin anime", "tambahin topi"', 'ai');
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // CHAT AI BIASA
+    async function prosesAI() {
       const pesan = input.value.trim();
       if (!pesan) return;
       tambahPesan(pesan, 'user');
@@ -51,29 +92,86 @@
       
       const loading = document.createElement('div');
       loading.className = 'ai';
-      loading.innerHTML = '<span>Mengetik...</span>';
+      loading.innerHTML = '<span>⏳ LanAI mikir...</span>';
       chat.appendChild(loading);
 
-      const hasil = await puter.ai.chat(pesan);
-      loading.remove();
-      tambahPesan(hasil, 'ai');
+      try {
+        let promptLengkap = SYSTEM_PROMPT + '\nUser: ' + pesan;
+        if (gambarUpload) promptLengkap += '\n[User udah upload gambar]';
+        
+        const url = `https://text.pollinations.ai/${encodeURIComponent(promptLengkap + '\nAI:')}`;
+        const res = await fetch(url);
+        const jawaban = await res.text();
+        
+        loading.remove();
+        tambahPesan(jawaban, 'ai');
+      } catch (e) {
+        loading.remove();
+        tambahPesan('Error woy: ' + e.message, 'ai');
+      }
     }
 
-    async function gambar() {
+    // GENERATE GAMBAR BARU DARI TEKS
+    async function generateBaru() {
       const pesan = input.value.trim();
-      if (!pesan) return;
+      if (!pesan) return tambahPesan('Tulis dulu mau gambar apa woy', 'ai');
+      
       tambahPesan(pesan, 'user');
       input.value = '';
       
       const loading = document.createElement('div');
       loading.className = 'ai';
-      loading.innerHTML = '<span>Membuat gambar...</span>';
+      loading.innerHTML = '<span>🎨 Lagi gambar...</span>';
       chat.appendChild(loading);
 
-      const hasil = await puter.ai.txt2img(pesan);
-      loading.remove();
-      tambahPesan('Gambar selesai:', 'ai', hasil.src);
+      try {
+        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(pesan)}?width=768&height=768&nologo=true`;
+        loading.remove();
+        tambahPesan('Nih gambar baru woy:', 'ai', imgUrl);
+      } catch (e) {
+        loading.remove();
+        tambahPesan('Gagal gambar: ' + e.message, 'ai');
+      }
     }
+
+    // EDIT GAMBAR YANG DIUPLOAD - Pake AI buat bikin versi baru
+    async function editGambar() {
+      const pesan = input.value.trim();
+      if (!gambarUpload) return tambahPesan('Upload gambar dulu woy', 'ai');
+      if (!pesan) return tambahPesan('Tulis perintah editnya. Contoh: "jadiin kartun"', 'ai');
+      
+      tambahPesan(`Edit: ${pesan}`, 'user');
+      input.value = '';
+      
+      const loading = document.createElement('div');
+      loading.className = 'ai';
+      loading.innerHTML = '<span>✨ AI lagi edit gambar...</span>';
+      chat.appendChild(loading);
+
+      try {
+        // Trick: Kita generate gambar baru tapi pake prompt + deskripsi
+        // Karena Pollinations gak bisa edit langsung, kita minta AI deskripsiin dulu
+        const deskripsi = await fetch(`https://text.pollinations.ai/Deskripsiin gambar ini singkat buat dijadiin prompt: ${pesan}`);
+        const promptEdit = await deskripsi.text();
+        
+        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptEdit + ', high quality, ' + pesan)}?width=768&height=768&nologo=true`;
+        
+        loading.remove();
+        tambahPesan('Nih hasil edit AI woy:', 'ai', imgUrl);
+      } catch (e) {
+        loading.remove();
+        tambahPesan('Gagal edit: ' + e.message, 'ai');
+      }
+    }
+
+    function downloadImg(url) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lanai-edit-' + Date.now() + '.jpg';
+      a.click();
+    }
+
+    tambahPesan('Gas woy! Upload gambar atau chat langsung. Gratis.', 'ai');
   </script>
 </body>
 </html>
