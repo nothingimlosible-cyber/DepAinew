@@ -3,120 +3,180 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LanAI</title>
+  <title>LanAi</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0d1117;
-      --card: #161b22;
-      --border: #30363d;
-      --text: #e6edf3;
-      --text-secondary: #7d8590;
-      --accent: #2f81f7;
-      --green: #238636;
-      --red: #da3633;
-      --orange: #fb8500;
+      --bg: #212121;
+      --sidebar: #171717;
+      --card: #2f2f2f;
+      --border: #424242;
+      --text: #ececec;
+      --text-secondary: #b4b4b4;
+      --accent: #10a37f;
+      --user-bg: #2f2f2f;
+      --ai-bg: #212121;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { 
-      font-family: 'Inter', sans-serif; 
+      font-family: 'Inter', -apple-system, sans-serif; 
       background: var(--bg); 
       color: var(--text); 
       height: 100vh; 
-      display: flex; 
-      flex-direction: column;
+      display: flex;
+      overflow: hidden;
     }
-    .header {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 24px;
+    
+    /* SIDEBAR ALA GPT */
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+    }
+    .new-chat {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+      transition: all 0.2s;
     }
-    .header .logo { font-size: 24px; }
-    .header h1 { font-size: 18px; font-weight: 600; }
-    .header p { font-size: 13px; color: var(--text-secondary); }
+    .new-chat:hover { background: var(--card); }
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
     
+    /* MAIN CHAT */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
     .chat-container { 
       flex: 1; 
       overflow-y: auto; 
-      padding: 24px; 
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      padding-bottom: 120px;
+    }
+    .msg-wrapper {
+      border-bottom: 1px solid var(--border);
     }
     .msg { 
-      display: flex; 
-      gap: 12px; 
-      max-width: 900px;
+      max-width: 768px;
       margin: 0 auto;
-      width: 100%;
+      padding: 24px;
+      display: flex;
+      gap: 24px;
     }
-    .msg .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--border);
+    .msg.user { background: var(--user-bg); }
+    .msg.ai { background: var(--ai-bg); }
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-weight: 600;
       flex-shrink: 0;
+      font-size: 14px;
     }
-    .msg.user .avatar { background: var(--accent); }
-    .msg.ai .avatar { background: var(--green); }
-    .msg .content {
+    .msg.user .avatar { background: #5436da; }
+    .msg.ai .avatar { background: var(--accent); }
+    .content {
+      flex: 1;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    .content p { margin-bottom: 16px; }
+    .content p:last-child { margin-bottom: 0; }
+    .content strong { font-weight: 600; }
+    .content code {
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 16px;
-      line-height: 1.6;
-      font-size: 15px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: 'Consolas', monospace;
     }
-    .msg.user { flex-direction: row-reverse; }
-    .msg.user .content { background: var(--accent); border: none; }
-    .msg .content img { 
+    .content pre {
+      background: #000;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid var(--border);
+    }
+    .content pre code {
+      background: transparent;
+      padding: 0;
+    }
+    .content ul, .content ol {
+      margin: 16px 0;
+      padding-left: 24px;
+    }
+    .content li { margin-bottom: 8px; }
+    .content img { 
       max-width: 100%; 
       border-radius: 8px; 
-      margin-top: 12px;
+      margin: 16px 0;
       border: 1px solid var(--border);
-    }
-    .msg .content pre {
-      background: var(--bg);
-      padding: 12px;
-      border-radius: 6px;
-      overflow-x: auto;
-      margin-top: 8px;
-      border: 1px solid var(--border);
+      cursor: pointer;
     }
     
-    .input-wrapper {
-      background: var(--card);
-      border-top: 1px solid var(--border);
-      padding: 16px 24px;
+    /* INPUT AREA */
+    .input-area {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, transparent, var(--bg) 40%);
+      padding: 24px;
     }
     .input-box {
-      max-width: 900px;
+      max-width: 768px;
       margin: 0 auto;
-      background: var(--bg);
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 8px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 8px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
     .preview {
       display: none;
       padding: 8px;
+      background: var(--bg);
+      border-radius: 8px;
+      align-items: center;
+      gap: 8px;
     }
-    .preview.show { display: block; }
-    .preview img { 
-      max-height: 100px; 
-      border-radius: 6px;
-      border: 1px solid var(--border);
+    .preview.show { display: flex; }
+    .preview img { max-height: 60px; border-radius: 4px; }
+    .preview .info { flex: 1; font-size: 13px; }
+    .preview .remove {
+      background: var(--border);
+      border: none;
+      color: var(--text);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
     }
     .input-main {
       display: flex;
@@ -129,68 +189,149 @@
       border: none;
       color: var(--text);
       font-family: inherit;
-      font-size: 15px;
+      font-size: 16px;
       resize: none;
       max-height: 200px;
-      padding: 8px;
+      padding: 4px;
       outline: none;
     }
-    .btn-group {
-      display: flex;
-      gap: 6px;
-      padding: 0 8px 8px 8px;
-    }
-    button, .upload-btn {
-      background: var(--border);
-      color: var(--text);
+    textarea::placeholder { color: var(--text-secondary); }
+    .send-btn {
+      background: var(--accent);
       border: none;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .send-btn:hover:not(:disabled) { background: #0d8f6f; }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    .tools {
+      display: flex;
+      gap: 8px;
+      padding: 0 4px;
+    }
+    .tool-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
       padding: 6px 12px;
       border-radius: 6px;
       font-size: 13px;
-      font-weight: 500;
       cursor: pointer;
-      font-family: inherit;
       display: flex;
       align-items: center;
       gap: 6px;
+      transition: all 0.2s;
     }
-    button:hover, .upload-btn:hover { background: #484f58; }
-    button.primary { background: var(--accent); }
-    button.primary:hover { background: #1f6feb; }
-    button.green { background: var(--green); }
-    button.green:hover { background: #2ea043; }
-    button.orange { background: var(--orange); color: #000; }
-    button.orange:hover { background: #ffb347; }
+    .tool-btn:hover { background: var(--card); color: var(--text); }
     #fileInput { display: none; }
-    .loading { opacity: 0.6; }
+    
+    /* WELCOME SCREEN */
+    .welcome {
+      max-width: 768px;
+      margin: 0 auto;
+      padding: 60px 24px;
+      text-align: center;
+    }
+    .welcome h1 {
+      font-size: 32px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #10a37f, #1a7f64);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .welcome p { color: var(--text-secondary); margin-bottom: 32px; }
+    .examples {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      text-align: left;
+    }
+    .example {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .example:hover { background: #3a3a3a; }
+    .example h3 { font-size: 14px; margin-bottom: 8px; }
+    .example p { font-size: 13px; margin: 0; }
+    
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .examples { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="logo">⚡</div>
-    <div>
-      <h1>LanAI Pro</h1>
-      <p>AI Chat + Image Editor by Lan Bandung</p>
+  <aside class="sidebar">
+    <button class="new-chat" onclick="newChat()">
+      <span>✨</span> New Chat
+    </button>
+    <div class="sidebar-footer">
+      <strong>AiLan</strong><br>
+      Powered by Pollinations AI<br>
+      Made with ❤️ by Lan
     </div>
-  </header>
+  </aside>
 
-  <main class="chat-container" id="chat"></main>
-
-  <div class="input-wrapper">
-    <div class="input-box">
-      <div class="preview" id="preview"></div>
-      <div class="input-main">
-        <textarea id="input" rows="1" placeholder="Ketik pesan atau perintah edit gambar..." onkeydown="handleKey(event)"></textarea>
-        <button class="primary" onclick="kirimChat()" id="sendBtn">Kirim</button>
-      </div>
-      <div class="btn-group">
-        <label for="fileInput" class="upload-btn">📁 Upload Gambar</label>
-        <input type="file" id="fileInput" accept="image/*">
-        <button class="green" onclick="generateGambar()">🎨 Buat Gambar</button>
-        <button class="orange" onclick="editGambar()">✨ Edit Gambar</button>
+  <main class="main">
+    <div class="chat-container" id="chat">
+      <div class="welcome" id="welcome">
+        <h1>AiLan</h1>
+        <p>Asisten AI buatan Lan. Tanya apa aja, bikin gambar, edit foto, coding. Gratis.</p>
+        <div class="examples">
+          <div class="example" onclick="setPrompt('Jelaskan cara kerja roket dengan analogi sederhana')">
+            <h3>🚀 Belajar</h3>
+            <p>Jelaskan cara kerja roket</p>
+          </div>
+          <div class="example" onclick="setPrompt('Buatkan saya HTML landing page modern untuk toko kopi')">
+            <h3>💻 Coding</h3>
+            <p>Buatkan landing page</p>
+          </div>
+          <div class="example" onclick="setPrompt('Bikinin gambar kucing astronot di bulan')">
+            <h3>🎨 Gambar</h3>
+            <p>Bikinin gambar kucing astronot</p>
+          </div>
+          <div class="example" onclick="setPrompt('Kasih ide konten TikTok untuk jualan seblak')">
+            <h3>💡 Ide</h3>
+            <p>Kasih ide konten TikTok</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+
+    <div class="input-area">
+      <div class="input-box">
+        <div class="preview" id="preview"></div>
+        <div class="input-main">
+          <textarea id="input" rows="1" placeholder="Message AiLan..." onkeydown="handleKey(event)"></textarea>
+          <button class="send-btn" onclick="kirimChat()" id="sendBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="tools">
+          <label for="fileInput" class="tool-btn">
+            📎 Attach
+          </label>
+          <input type="file" id="fileInput" accept="image/*">
+          <button class="tool-btn" onclick="generateGambar()">🎨 Generate</button>
+          <button class="tool-btn" onclick="editGambar()">✨ Edit</button>
+        </div>
+      </div>
+    </div>
+  </main>
 
   <script>
     const chat = document.getElementById('chat');
@@ -198,33 +339,35 @@
     const fileInput = document.getElementById('fileInput');
     const preview = document.getElementById('preview');
     const sendBtn = document.getElementById('sendBtn');
+    const welcome = document.getElementById('welcome');
     
     let gambarUpload = null;
     let chatHistory = [];
     
-    // SYSTEM PROMPT BARU - PINTER + RAPIH
-    const SYSTEM_PROMPT = `Anda adalah LanAI Pro, asisten AI profesional buatan Lan dari Bandung.
+    // SYSTEM PROMPT - RASA GPT-4
+    const SYSTEM_PROMPT = `You are AiLan, a helpful AI assistant created by Lan from Bandung, Indonesia.
 
-ATURAN KOMUNIKASI:
-1. Gunakan Bahasa Indonesia yang baik, jelas, dan terstruktur.
-2. Jawab to the point. Jangan bertele-tele.
-3. Gunakan format markdown untuk kerapihan: **bold**, \`code\`, list dengan -.
-4. Jika user mengupload gambar, analisis dulu gambarnya sebelum kasih saran edit.
-5. Jika tidak tahu, katakan "Maaf, saya belum memiliki informasi itu". Jangan mengarang.
-6. Nada bicara: profesional tapi ramah. Boleh santai kalau user santai duluan.
+CORE PRINCIPLES:
+1. Be helpful, harmless, and honest.
+2. Answer in clear, well-structured Bahasa Indonesia.
+3. Use markdown formatting: **bold**, \`inline code\`, \`\`\`code blocks\`\`\`, lists.
+4. Be concise but thorough. Don't repeat yourself.
+5. If you don't know something, say so. Don't hallucinate.
+6. For code, always provide complete, working examples.
+7. Be professional yet friendly. Adapt to user's tone.
 
-KEMAMPUAN:
-- Menjawab pertanyaan umum
-- Memberi ide edit gambar
-- Menulis kode HTML/CSS/JS
-- Analisis masalah
+CAPABILITIES:
+- Answer questions on any topic
+- Write and explain code
+- Creative writing and brainstorming
+- Analyze uploaded images
+- Generate image prompts
 
-Anda TIDAK BISA edit gambar langsung. Anda hanya memberi prompt untuk generate gambar baru.`;
+You cannot edit images directly. You can only describe how to edit or generate new versions.`;
 
-    // AUTO RESIZE TEXTAREA
     input.addEventListener('input', function() {
       this.style.height = 'auto';
-      this.style.height = this.scrollHeight + 'px';
+      this.style.height = Math.min(this.scrollHeight, 200) + 'px';
     });
 
     function handleKey(e) {
@@ -234,85 +377,135 @@ Anda TIDAK BISA edit gambar langsung. Anda hanya memberi prompt untuk generate g
       }
     }
 
+    function setPrompt(text) {
+      input.value = text;
+      input.focus();
+    }
+
+    function newChat() {
+      chatHistory = [];
+      chat.innerHTML = '';
+      welcome.style.display = 'block';
+      hapusGambar();
+    }
+
     function tambahPesan(role, content, imgUrl = null) {
+      welcome.style.display = 'none';
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'msg-wrapper';
+      
       const msg = document.createElement('div');
       msg.className = `msg ${role}`;
       
-      const avatar = role === 'user' ? '👤' : '⚡';
-      let html = `<div class="avatar">${avatar}</div><div class="content">${formatText(content)}`;
+      const avatar = role === 'user' ? 'U' : 'AI';
+      let html = `<div class="avatar">${avatar}</div><div class="content">${formatMarkdown(content)}`;
       if (imgUrl) {
-        html += `<img src="${imgUrl}" onclick="window.open('${imgUrl}')" style="cursor:pointer">`;
+        html += `<img src="${imgUrl}" onclick="window.open('${imgUrl}')" title="Klik untuk buka ukuran penuh">`;
       }
       html += `</div>`;
       
       msg.innerHTML = html;
-      chat.appendChild(msg);
+      wrapper.appendChild(msg);
+      chat.appendChild(wrapper);
       chat.scrollTop = chat.scrollHeight;
     }
 
-    function formatText(text) {
-      // Basic markdown: **bold**, `code`, line breaks
+    function formatMarkdown(text) {
       return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/`(.*?)`/g, '<code>$1</code>')
-        .replace(/\n/g, '<br>');
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+        .replace(/^\* (.+)/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+        .replace(/^\d+\. (.+)/gm, '<li>$1</li>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/^/, '<p>')
+        .replace(/$/, '</p>');
     }
 
-    // UPLOAD GAMBAR
     fileInput.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
       
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Ukuran gambar maksimal 5MB');
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         gambarUpload = e.target.result;
-        preview.innerHTML = `<img src="${gambarUpload}"><small style="color:var(--text-secondary);margin-left:8px">${file.name}</small>`;
+        preview.innerHTML = `
+          <img src="${gambarUpload}">
+          <div class="info">
+            <div style="font-weight:500">${file.name}</div>
+            <div style="color:var(--text-secondary)">${(file.size/1024).toFixed(1)} KB</div>
+          </div>
+          <button class="remove" onclick="hapusGambar()">×</button>
+        `;
         preview.classList.add('show');
-        tambahPesan('user', 'Saya upload gambar');
-        tambahPesan('ai', 'Gambar diterima. Apa yang ingin Anda lakukan dengan gambar ini?\n\n**Contoh perintah:**\n- `Jadikan gaya anime`\n- `Hapus background`\n- `Ubah jadi foto tahun 90an`\n- `Tambahkan efek cahaya`');
       };
       reader.readAsDataURL(file);
     };
 
-    // CHAT - PAKE MODEL MISTRAL LARGE (PINTER)
+    function hapusGambar() {
+      gambarUpload = null;
+      preview.classList.remove('show');
+      preview.innerHTML = '';
+      fileInput.value = '';
+    }
+
+    // CHAT - MODEL PINTER ANTI QUEUE
     async function kirimChat() {
       const pesan = input.value.trim();
-      if (!pesan) return;
+      if (!pesan && !gambarUpload) return;
       
-      tambahPesan('user', pesan);
+      const displayMsg = pesan || 'Lihat gambar ini';
+      tambahPesan('user', displayMsg);
       input.value = '';
       input.style.height = 'auto';
       
       chatHistory.push({ role: 'user', content: pesan });
-      if (chatHistory.length > 10) chatHistory.shift();
+      if (chatHistory.length > 12) chatHistory.shift();
       
       setLoading(true);
       
       try {
-        const historyText = chatHistory.slice(-6).map(c => `${c.role}: ${c.content}`).join('\n');
-        const prompt = `${SYSTEM_PROMPT}\n\nRiwayat:\n${historyText}\n\nAI:`;
+        const historyText = chatHistory.slice(-8).map(c => `${c.role}: ${c.content}`).join('\n');
+        let prompt = `${SYSTEM_PROMPT}\n\nRiwayat percakapan:\n${historyText}\n\n`;
         
-        // PAKE MODEL MISTRAL - LEBIH PINTER DARI DEFAULT
-        const url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=mistral`;
+        if (gambarUpload) {
+          prompt += `[User mengupload gambar. Berikan analisis atau saran edit.]\n\n`;
+        }
+        
+        prompt += `assistant:`;
+        
+        // PAKE MODEL OPENAI-LARGE = PALING PINTER + GRATIS
+        const url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai-large&seed=${Date.now()}&json=false`;
         const res = await fetch(url);
-        const jawaban = await res.text();
         
-        const jawabanBersih = jawaban.replace(/^(AI:|LanAI Pro:)/i, '').trim();
+        if (!res.ok) throw new Error(`API Error ${res.status}`);
+        
+        const jawaban = await res.text();
+        const jawabanBersih = jawaban.replace(/^(assistant:|AI:)/i, '').trim();
+        
         tambahPesan('ai', jawabanBersih);
         chatHistory.push({ role: 'assistant', content: jawabanBersih });
         
       } catch (e) {
-        tambahPesan('ai', `Maaf, terjadi kesalahan: \`${e.message}\``);
+        tambahPesan('ai', `Maaf, terjadi kesalahan: **${e.message}**\n\nSilakan coba lagi dalam beberapa detik.`);
       } finally {
         setLoading(false);
+        hapusGambar();
       }
     }
 
-    // GENERATE GAMBAR BARU
     async function generateGambar() {
       const pesan = input.value.trim();
       if (!pesan) {
-        tambahPesan('ai', 'Silakan tulis deskripsi gambar yang ingin dibuat terlebih dahulu.');
+        tambahPesan('ai', 'Silakan tulis deskripsi gambar yang ingin dibuat terlebih dahulu.\n\n**Contoh:** `kucing astronot sedang main gitar di bulan, cinematic lighting, 8k`');
         return;
       }
       
@@ -322,28 +515,26 @@ Anda TIDAK BISA edit gambar langsung. Anda hanya memberi prompt untuk generate g
       setLoading(true);
       
       try {
-        // Tambahin quality prompt biar hasil bagus
-        const promptFinal = `${pesan}, high quality, detailed, 8k, professional photography`;
-        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptFinal)}?width=1024&height=1024&nologo=true&enhance=true`;
+        const promptFinal = `${pesan}, masterpiece, best quality, ultra detailed, 8k`;
+        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptFinal)}?width=1024&height=1024&nologo=true&enhance=true&seed=${Date.now()}`;
         
-        tambahPesan('ai', `Berikut gambar untuk: **${pesan}**`, imgUrl);
+        tambahPesan('ai', `Berikut hasil generate untuk: **${pesan}**`, imgUrl);
         
       } catch (e) {
-        tambahPesan('ai', `Gagal membuat gambar: \`${e.message}\``);
+        tambahPesan('ai', `Gagal membuat gambar: **${e.message}**`);
       } finally {
         setLoading(false);
       }
     }
 
-    // EDIT GAMBAR - GENERATE ULANG BERDASARKAN PERINTAH
     async function editGambar() {
       const pesan = input.value.trim();
       if (!gambarUpload) {
-        tambahPesan('ai', 'Silakan upload gambar terlebih dahulu menggunakan tombol **📁 Upload Gambar**.');
+        tambahPesan('ai', 'Silakan upload gambar terlebih dahulu menggunakan tombol **📎 Attach**.');
         return;
       }
       if (!pesan) {
-        tambahPesan('ai', 'Tulis perintah editnya. Contoh: `jadikan gaya anime`, `hapus background`');
+        tambahPesan('ai', 'Tulis perintah editnya.\n\n**Contoh:**\n- `ubah jadi gaya anime studio ghibli`\n- `hapus background jadi transparan`\n- `tambahkan efek cyberpunk neon`');
         return;
       }
       
@@ -353,27 +544,23 @@ Anda TIDAK BISA edit gambar langsung. Anda hanya memberi prompt untuk generate g
       setLoading(true);
       
       try {
-        // Karena Pollinations gak bisa edit langsung, kita generate ulang dengan prompt deskriptif
-        const promptEdit = `Recreate this image with these changes: ${pesan}. High quality, detailed, maintain composition`;
-        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptEdit)}?width=1024&height=1024&nologo=true&enhance=true`;
+        const promptEdit = `Recreate the uploaded image with these modifications: ${pesan}. Maintain original composition and quality. Masterpiece, ultra detailed, 8k`;
+        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptEdit)}?width=1024&height=1024&nologo=true&enhance=true&seed=${Date.now()}`;
         
-        tambahPesan('ai', `Hasil edit dengan perintah: **${pesan}**\n\n*Catatan: Ini adalah hasil generate ulang oleh AI, bukan edit pixel langsung.*`, imgUrl);
+        tambahPesan('ai', `Hasil edit dengan perintah: **${pesan}**\n\n*Catatan: Ini adalah hasil generate ulang oleh AI berdasarkan deskripsi Anda.*`, imgUrl);
         
       } catch (e) {
-        tambahPesan('ai', `Gagal mengedit gambar: \`${e.message}\``);
+        tambahPesan('ai', `Gagal mengedit gambar: **${e.message}**`);
       } finally {
         setLoading(false);
+        hapusGambar();
       }
     }
 
     function setLoading(status) {
       sendBtn.disabled = status;
-      sendBtn.classList.toggle('loading', status);
-      sendBtn.textContent = status ? 'Proses...' : 'Kirim';
+      input.disabled = status;
     }
-
-    // PESAN AWAL
-    tambahPesan('ai', 'Halo! Saya **LanAI Pro**.\n\nSaya siap membantu Anda dengan:\n- Menjawab pertanyaan\n- Memberi ide edit gambar\n- Membuat gambar dari teks\n\nSilakan mulai chat atau upload gambar.');
   </script>
 </body>
 </html>
